@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        
+        #app {
+            margin: 0 auto;
+            text-align: center;
+            width: 500px;
+            height: 100%;
+            background-color: #ccc;
+        }
+
+        ul {
+            list-style: none;
+            
+           
+        }
+
+        li {
+            font-size: 22px;
+            font-weight: 700;
+            color: hotpink;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        h2 {
+            text-align: center;
+        }
+ 
+        ul>li>a {
+            text-decoration: none;
+            color: #fff;
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #000;
+            text-align: center;
+            line-height: 13px;
+            font-size: 12px;
+           
+
+        }
+        li.done span {
+            text-decoration: line-through;
+            color: #555;
+        }
+        .btn {
+            border-radius: 5px;
+            border: none;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h2>待办事项</h2>
+        <input type="text" v-model="someThing">
+        <input type="button" value="增加" @click="add" class="btn">
+        <h3>总数:{{list.length}}<br>完成:{{doneNum}}</h3>
+            
+        <ul>
+            <li v-for="(item, index) in list" v-bind:class="{done:item.isDone }" v-on:click="doThis(index)">
+                <span>{{index+1}}.{{item.name}}</span>
+                <!-- .stop 阻止冒泡 -->
+                <a href="javascript:void(0)" v-on:click.stop="remove(index)">x</a>
+            </li>
+        </ul>
+    </div>
+</body>
+
+</html>
+<script src="../lib/vue.min.js"></script>
+<script>
+    //读取保存的数据
+    let list = window.localStorage.getItem('toDoList');
+    //数据存在
+    if(list) {
+        // string->转对象数组
+        list = JSON.parse(list);
+    }else {
+        //没值  就去原始值
+        list= [{
+                    name: '买菜',
+                    isDone: false
+                },
+                {
+                    name: '洗菜',
+                    isDone: false
+                },
+                {
+                    name: '切菜',
+                    isDone: false
+                },
+                {
+                    name: '烧菜',
+                    isDone: false
+                }
+            ]
+    }
+    //保存数据到本地
+     function preserveList() {
+        window.localStorage.setItem('toDoList',JSON.stringify(list));
+    };
+
+    let app = new Vue({
+        // 选择器
+        el: '#app',
+        // 普通数据
+        data: {
+            someThing: '',
+            list
+        },
+       //方法
+        methods: {
+            //新增代办事项
+            add() {
+                this.list.push({
+                    name: this.someThing,
+                    isDone: false
+                })
+                preserveList();
+            },
+            //干完某件事
+            doThis(index) {
+                this.list[index].isDone = !this.list[index].isDone;
+                preserveList();
+            },
+            remove(index) {
+                //删除数组中对应的值
+                this.list.splice(index, 1);
+                preserveList();
+            }
+           
+        },
+        //计数
+        computed: {
+                //计算isDone为true的总数
+               doneNum() {
+                let num = 0;
+                for(i = 0 ; i<this.list.length; i++) {
+                    if (this.list[i].isDone) {
+                        num++;
+                    }
+                }
+                return num;
+               }
+            }
+    });
+
+   
+</script>
